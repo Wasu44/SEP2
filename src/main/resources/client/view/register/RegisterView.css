@@ -1,0 +1,7 @@
+.register-root {
+    -fx-spacing: 10;
+    -fx-alignment: CENTER;
+    -fx-pref-width: 320;
+    -fx-pref-height: 240;
+    -fx-padding: 20;
+}

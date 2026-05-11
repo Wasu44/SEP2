@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.client.view.register.RegisterViewController"
+      styleClass="register-root"
+      stylesheets="@RegisterView.css"
+      spacing="10">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Register" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <TextField fx:id="nameField" promptText="Full name"/>
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Password (min 6 chars)"/>
+
+    <Label text="Account type:"/>
+    <ChoiceBox fx:id="roleChoice">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="CUSTOMER"/>
+                <String fx:value="PROVIDER"/>
+            </FXCollections>
+        </items>
+    </ChoiceBox>
+
+    <Button text="Register" onAction="#handleRegister"/>
+    <Hyperlink text="Already have an account? Login here" onAction="#handleGoToLogin"/>
+
+    <Label fx:id="errorLabel" textFill="red" wrapText="true"/>
+    <Label fx:id="infoLabel" textFill="green" wrapText="true"/>
+</VBox>

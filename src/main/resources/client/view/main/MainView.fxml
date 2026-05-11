@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example.client.view.main.MainViewController"
+      spacing="10" prefWidth="380" prefHeight="420">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label fx:id="welcomeLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <Label fx:id="roleLabel"/>
+
+    <Button text="Manage account" onAction="#handleManageAccount" maxWidth="Infinity"/>
+
+    <Button fx:id="createListingButton" text="Create listing" onAction="#handleCreateListing" maxWidth="Infinity"/>
+    <Button fx:id="myListingsButton" text="My listings" onAction="#handleMyListings" maxWidth="Infinity"/>
+    <Button fx:id="providerReservationsButton" text="Incoming reservations" onAction="#handleReservations" maxWidth="Infinity"/>
+
+    <Button fx:id="browseListingsButton" text="Browse listings" onAction="#handleBrowseListings" maxWidth="Infinity"/>
+    <Button fx:id="myReservationsButton" text="My reservations" onAction="#handleReservations" maxWidth="Infinity"/>
+
+    <Button fx:id="adminVerifyButton" text="Verify providers" onAction="#handleAdminVerification" maxWidth="Infinity"/>
+
+    <Button text="Log out" onAction="#handleLogout" maxWidth="Infinity"/>
+</VBox>

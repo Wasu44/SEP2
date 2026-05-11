@@ -1,0 +1,76 @@
+@startuml Register Account
+title US1 - Register account (Sprint 1)
+
+actor User
+boundary "RegisterView\n(FXML)"           as View
+control  "RegisterViewController"          as Ctrl
+control  "RegisterViewModel"               as VM
+control  "ServerProxy\n(client networking)" as Proxy
+control  "ServerConnection\n(server thread)" as Conn
+entity   "AccountRepository\n(JDBC)"       as Repo
+database "PostgreSQL\n(accounts table)"    as DB
+
+User -> View : fill form (name, email,\npassword, role) and click Register
+View -> Ctrl : handleRegister()
+Ctrl -> VM   : register()
+
+note right of VM
+  client-side validation:
+  - all fields non-empty
+  - email contains '@' and '.'
+  - password length >= 6
+end note
+
+alt local validation fails
+  VM --> Ctrl : false
+  Ctrl --> View : errorMessage shown
+  View --> User : "All fields are required"\netc.
+else local validation passes
+  VM -> Proxy : register(email, name,\npassword, role)
+  Proxy -> Proxy : build Request(REGISTER, payload)
+  Proxy -> Conn  : writeObject(Request)
+  Conn -> Conn   : handleRegister(req)
+
+  note right of Conn
+    server-side validation
+    (never trust the client):
+    - fields, email format,
+      password length, role
+  end note
+
+  Conn -> Repo : existsByEmail(email)
+  Repo -> DB   : SELECT 1 FROM accounts\nWHERE LOWER(email)=LOWER(?)
+  DB --> Repo  : 0 rows
+  Repo --> Conn : false
+
+  Conn -> Conn : PasswordHasher.hash(password)
+
+  alt role == CUSTOMER
+    Conn -> Repo : add(email, name, hash,\nCUSTOMER, ACTIVE)
+  else role == PROVIDER
+    Conn -> Repo : add(email, name, hash,\nPROVIDER, PENDING)
+  end
+
+  Repo -> DB   : INSERT INTO accounts(...)\nRETURNING id
+  DB --> Repo  : id
+  Repo --> Conn : Account
+
+  Conn -> Conn : Response.ok(account.toDto())
+  Conn --> Proxy : writeObject(Response)
+  Proxy --> VM   : Response
+
+  alt response failure (e.g. duplicate email)
+    VM --> Ctrl  : false
+    Ctrl --> View : errorMessage shown
+    View --> User : "Email already in use"
+  else success && status == PENDING
+    VM --> Ctrl  : true
+    Ctrl --> View : infoMessage shown
+    View --> User : "Provider account created.\nAwaiting admin verification."
+  else success && status == ACTIVE
+    VM --> Ctrl  : true
+    Ctrl --> View : infoMessage shown
+    View --> User : "Account created.\nYou can now log in."
+  end
+end
+@enduml
