@@ -27,4 +27,5 @@ module FoodWasteRedistribution {
   exports org.example.server.persistence.reservation;
   exports org.example.server.model.reservation;
   exports org.example.server.database;
+  exports org.example.client.viewmodel.browselistings;
 }

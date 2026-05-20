@@ -87,6 +87,19 @@ public class JdbcListingRepository implements ListingRepository {
   }
 
   @Override
+  public boolean reserveIfAvailable(int id) {
+    String sql = "UPDATE listings SET status = 'RESERVED' WHERE id = ? AND status = 'AVAILABLE'";
+    try (Connection c = Database.get();
+         PreparedStatement ps = c.prepareStatement(sql)) {
+      ps.setInt(1, id);
+      int rows = ps.executeUpdate();
+      return rows == 1;
+    } catch (SQLException e) {
+      throw new RuntimeException("Failed atomic reserve", e);
+    }
+  }
+
+  @Override
   public void updateStatus(int id, String newStatus) {
     String sql = "UPDATE listings SET status = ? WHERE id = ?";
     try (Connection c = Database.get();

@@ -48,6 +48,17 @@ public class InMemoryListingRepository implements ListingRepository {
   }
 
   @Override
+  public synchronized boolean reserveIfAvailable(int id) {
+    for (Listing l : listings) {
+      if (l.getId() == id && "AVAILABLE".equals(l.getStatus())) {
+        l.setStatus("RESERVED");
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public synchronized void updateStatus(int id, String newStatus) {
     for (Listing l : listings) {
       if (l.getId() == id) {

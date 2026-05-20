@@ -17,4 +17,8 @@ public interface ListingRepository {
   List<Listing> findAllAvailable();
 
   void updateStatus(int id, String newStatus);
+
+  /** Atomic check-and-set: flips the listing from AVAILABLE to RESERVED.
+   *  Returns true iff this caller is the one who actually moved it. */
+  boolean reserveIfAvailable(int id);
 }

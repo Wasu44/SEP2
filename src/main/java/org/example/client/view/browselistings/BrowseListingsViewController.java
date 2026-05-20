@@ -1,19 +1,24 @@
 package org.example.client.view.browselistings;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import org.example.client.core.ViewHandler;
 import org.example.client.viewmodel.browselistings.BrowseListingsViewModel;
 import org.example.shared.dto.ListingDTO;
 
 public class BrowseListingsViewController {
 
+  @FXML private TextField filterField;
+  @FXML private Label countLabel;
   @FXML private TableView<ListingDTO> listingsTable;
   @FXML private TableColumn<ListingDTO, Number> idColumn;
   @FXML private TableColumn<ListingDTO, String> titleColumn;
+  @FXML private TableColumn<ListingDTO, String> providerColumn;
   @FXML private TableColumn<ListingDTO, Number> quantityColumn;
   @FXML private TableColumn<ListingDTO, String> pickupColumn;
   @FXML private TableColumn<ListingDTO, String> descColumn;
@@ -29,11 +34,15 @@ public class BrowseListingsViewController {
 
     idColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getId()));
     titleColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getTitle()));
+    providerColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getProviderName()));
     quantityColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getQuantity()));
     pickupColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getPickupWindow()));
     descColumn.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getDescription()));
 
     listingsTable.setItems(viewModel.getListings());
+    filterField.textProperty().bindBidirectional(viewModel.filterTextProperty());
+    countLabel.textProperty().bind(Bindings.size(viewModel.getListings()).asString("(%d shown)"));
+
     errorLabel.textProperty().bind(viewModel.errorMessageProperty());
     infoLabel.textProperty().bind(viewModel.infoMessageProperty());
 

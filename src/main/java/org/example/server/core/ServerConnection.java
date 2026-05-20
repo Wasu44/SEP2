@@ -272,7 +272,13 @@ public class ServerConnection implements Runnable {
   private Response handleBrowseListings(Request req) {
     if (req.get("accountId") == null) return Response.fail("Not authenticated");
     List<ListingDTO> available = new ArrayList<>();
-    for (Listing l : listingRepository.findAllAvailable()) available.add(l.toDto());
+    for (Listing l : listingRepository.findAllAvailable()) {
+      Account provider = accountRepository.findById(l.getProviderId()).orElse(null);
+      String providerName = provider != null ? provider.getName() : "(unknown)";
+      ListingDTO dto = l.toDto();
+      dto.setProviderName(providerName);
+      available.add(dto);
+    }
     return Response.ok(new ArrayList<>(available));
   }
 
@@ -283,12 +289,14 @@ public class ServerConnection implements Runnable {
     if (listingId == null) return Response.fail("listingId required");
     Optional<Listing> found = listingRepository.findById(listingId);
     if (found.isEmpty()) return Response.fail("Listing not found");
-    Listing l = found.get();
-    if (!l.getStatus().equals(ListingDTO.STATUS_AVAILABLE)) {
-      return Response.fail("Listing is not available");
-    }
-    Reservation r = reservationRepository.add(l.getId(), customer.getId(), ReservationDTO.STATUS_PENDING);
-    listingRepository.updateStatus(l.getId(), ListingDTO.STATUS_RESERVED);
+
+    // Atomic guard: only the caller that flips AVAILABLE -> RESERVED in a single
+    // SQL UPDATE owns the reservation slot. Two concurrent clicks => one winner.
+    boolean acquired = listingRepository.reserveIfAvailable(listingId);
+    if (!acquired) return Response.fail("Listing is no longer available");
+
+    Reservation r = reservationRepository.add(listingId, customer.getId(), ReservationDTO.STATUS_PENDING);
+    Listing l = listingRepository.findById(listingId).orElse(found.get());
     return Response.ok(toDto(r, l, customer));
   }
 
